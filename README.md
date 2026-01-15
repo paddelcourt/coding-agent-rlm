@@ -13,9 +13,11 @@ All code generated from the agent itself will be stored in the working_directory
 
 To run the project, you can run main.py. Make sure to set up your environment variables first.
 
+```bash
+uv sync
 ```
-uv pip install .
-```
+
+This installs dependencies from the lockfile (`uv.lock`) ensuring reproducible builds.
 
 For environment variables, create a .env file in the root directory with the following content:
 
