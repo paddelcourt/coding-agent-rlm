@@ -5,7 +5,6 @@ from functions.get_files_info import get_files_info
 from functions.run_any_file import run_any_file
 from functions.write_file import write_file
 from functions.delete_file import delete_file
-from functions.call_sub_rlm import call_sub_rlm, run_sub_rlm
 
 
 
@@ -23,13 +22,12 @@ def call_function(function_call_part, verbose=False, client=None):
         "run_any_file": run_any_file,
         "write_file": write_file,
         "delete_file": delete_file,
-        "call_sub_rlm": call_sub_rlm
-
     }
 
     if function_name == "call_sub_rlm":
+        from functions.call_sub_rlm import run_sub_rlm  # Lazy import to avoid circular dependency
         task = function_call_part.args.get("task", "")
-        result = run_sub_rlm(client, task, verbose)
+        result = run_sub_rlm(client, task, verbose, depth=0, max_depth=1)
         return types.Content(
             role="tool",
             parts=[
