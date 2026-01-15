@@ -8,6 +8,7 @@ from functions.run_any_file import schema_run_any_file
 from functions.write_file import schema_write_file
 from functions.get_file_content import schema_get_file_content
 from functions.delete_file import schema_delete_file
+from functions.call_sub_rlm import schema_call_sub_rlm
 from functions.call_functions import call_function
 import click
 
@@ -26,7 +27,7 @@ def cli(verbose, max_turns):
     client = genai.Client(api_key=api_key)
 
     available_functions = types.Tool(
-        function_declarations=[schema_get_files_info, schema_run_any_file, schema_write_file, schema_get_file_content, schema_delete_file],
+        function_declarations=[schema_get_files_info, schema_run_any_file, schema_write_file, schema_get_file_content, schema_delete_file, schema_call_sub_rlm],
     )
     config=types.GenerateContentConfig(
         tools=[available_functions], system_instruction=system_prompt
@@ -86,7 +87,7 @@ def generate_content(client, messages, verbose, config):
 
 
             for function_call_part in response.function_calls:
-                function_call_result = call_function(function_call_part, verbose=verbose)
+                function_call_result = call_function(function_call_part, verbose=verbose, client=client)
                 function_responses += function_call_result.parts
                 # just print the function result if verbose
                 if verbose:
