@@ -9,6 +9,7 @@ from functions.get_file_content import schema_get_file_content
 from functions.delete_file import schema_delete_file
 from functions.call_functions import call_function
 from prompts import repl_system_prompt
+from rlm.repl import REPLEnvironment, extract_repl_code
 
 available_functions = types.Tool(
         function_declarations=[schema_get_files_info, schema_run_any_file, schema_write_file, schema_get_file_content, schema_delete_file],
@@ -18,21 +19,19 @@ config=types.GenerateContentConfig(
     )
 
 def run_sub_rlm(client, task, verbose=False):
-    """Run sub-agent to completion and return result."""
     messages = [types.Content(role="user", parts=[types.Part.from_text(task)])]
+    repl = REPLEnvironment(context=task, llm_client = client)
     while True:
-        result = call_sub_rlm(client, messages, verbose, config)
+        result = call_sub_rlm(client, messages, verbose, config, repl=repl)
         if result is not None:
             return result
 
-def call_sub_rlm(client, messages, verbose, config):
-        
+def call_sub_rlm(client, messages, verbose, config, repl=None):
+
     model_name = os.environ.get("GEMINI_SUB_RLM_MODEL")
-    
     function_responses = []
 
     try:
-        
 
         response = client.models.generate_content(
             model=model_name,
@@ -40,7 +39,21 @@ def call_sub_rlm(client, messages, verbose, config):
             config=config
         )
 
+        if response.text:
+            code = extract_repl_code(response.text)
+            if code:
+                output = repl.execute(code)
+                if repl.finished:
+                    return repl.result
+                messages.append(types.Content(
+                role="user",
+                parts=[types.Part.from_text(f"REPL Output:\n{output}")]
+            ))
+                return None
+                    
 
+
+        
 
         if response.candidates:
             for candidate in response.candidates:
