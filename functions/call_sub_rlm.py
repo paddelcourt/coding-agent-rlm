@@ -64,7 +64,7 @@ def call_sub_rlm(client, messages, verbose, config, repl=None):
 
 
         for function_call_part in response.function_calls:
-            function_call_result = call_function(function_call_part, verbose=verbose)
+            function_call_result = call_function(function_call_part, verbose=verbose, client=client)
             function_responses += function_call_result.parts
             # just print the function result if verbose
 
@@ -74,3 +74,19 @@ def call_sub_rlm(client, messages, verbose, config, repl=None):
             
     except Exception as e:
         print(f"Error: {e}")
+
+
+schema_call_sub_rlm = types.FunctionDeclaration(
+    name="call_sub_rlm",
+    description="Call a sub recursive language model to handle complex tasks that require decomposition, analysis of large files, or multi-step reasoning. Use this when the task is too complex to handle directly.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "task": types.Schema(
+                type=types.Type.STRING,
+                description="The task or query to delegate to the sub-RLM agent. Be specific about what you want analyzed or accomplished.",
+            ),
+        },
+        required=["task"],
+    ),
+)
