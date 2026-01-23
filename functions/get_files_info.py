@@ -1,16 +1,16 @@
 import os
 from google.genai import types
 
-def get_files_info(working_directory, directory="."):
-         full_path = os.path.join(working_directory, directory)
+def get_files_info(working_directory, file_path="."):
+         full_path = os.path.join(working_directory, file_path)
          abs_path = os.path.abspath(full_path)
          abs_working_dir = os.path.abspath(working_directory)
          
          try:
             if abs_path.startswith(abs_working_dir) is False:
-                return f'Error: Cannot list "{directory}" as it is outside the permitted working directory'
+                return f'Error: Cannot list "{file_path}" as it is outside the permitted working directory'
             elif os.path.isdir(abs_path) is False:
-                return f'Error: "{directory}" is not a directory'
+                return f'Error: "{file_path}" is not a directory'
             else:
                 files_directory = os.listdir(abs_path)
                 lines = []
